@@ -29,7 +29,7 @@ const Input: React.FC<InputProps> = ({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
-  const { fieldName, defaultValue, error, registerField } = useField(name);
+  const { fieldName, error, registerField } = useField(name);
 
   useEffect(() => {
     registerField({
@@ -68,7 +68,7 @@ const Input: React.FC<InputProps> = ({
             type="button"
             onClick={() => setIsPasswordVisible(!isPasswordVisible)}
           >
-            {isPasswordVisible ? <FiEye /> : <FiEyeOff />}
+            {isPasswordVisible ? <FiEye size={20} /> : <FiEyeOff size={20} />}
           </button>
         </>
       ) : (

@@ -62,15 +62,21 @@ export const Container = styled.div<ContainerProps>`
   button {
     background: transparent;
     border: 0;
+    width: 20px;
+    height: 20px;
   }
   & + div {
     margin-top: 8px;
+  }
+
+  input + button {
+    margin-left: 8px;
   }
 `;
 
 export const Error = styled(Tooltip)`
   height: 20px;
-  margin-left: 16px;
+  margin-left: 8px;
   svg {
     margin: 0;
   }
