@@ -1,5 +1,13 @@
-import React, { useCallback, useRef } from 'react';
-import { FiArrowLeft, FiMail, FiLock, FiUser } from 'react-icons/fi';
+import React, { useCallback, useRef, useState } from 'react';
+import zxcvbn from 'zxcvbn';
+import {
+  FiArrowLeft,
+  FiMail,
+  FiLock,
+  FiUser,
+  FiThumbsDown,
+  FiThumbsUp,
+} from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import { Form } from '@unform/web';
@@ -7,7 +15,14 @@ import { Link, useHistory } from 'react-router-dom';
 import logoImg from '../../assets/images/logo.svg';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
-import { Container, Content, Background, AnimationContainer } from './styles';
+import {
+  Container,
+  Content,
+  Background,
+  AnimationContainer,
+  PasswordStrengthBar,
+  PasswordStrengthBarText,
+} from './styles';
 import getValidationErrors from '../../utils/getValidationErrors';
 import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
@@ -19,6 +34,29 @@ interface FormData {
 }
 
 const SignUp: React.FC = () => {
+  const meterText = {
+    1: (
+      <>
+        Ruim <FiThumbsDown />
+      </>
+    ),
+    2: (
+      <>
+        Médio <FiThumbsUp />
+      </>
+    ),
+    3: (
+      <>
+        Forte <FiThumbsUp />
+      </>
+    ),
+    4: (
+      <>
+        Muito Forte <FiThumbsUp />
+      </>
+    ),
+  };
+  const [meter, setMeter] = useState<0 | 1 | 2 | 3 | 4>(0);
   const formRef = useRef<FormHandles>(null);
   const history = useHistory();
   const { addToast } = useToast();
@@ -45,12 +83,24 @@ const SignUp: React.FC = () => {
         });
         history.push('/');
       } catch (err) {
-        const errors = getValidationErrors(err);
-        formRef?.current?.setErrors(errors);
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formRef?.current?.setErrors(errors);
+        } else {
+          addToast({
+            type: 'error',
+            title: 'Não foi possível cadastrar usuário',
+            description: 'Contate o suporte.',
+          });
+        }
       }
     },
     [history, addToast]
   );
+  const handleValidateStrengthPass = useCallback((pass) => {
+    const { score } = zxcvbn(pass);
+    setMeter(score);
+  }, []);
   return (
     <Container>
       <Background />
@@ -77,7 +127,14 @@ const SignUp: React.FC = () => {
               type="password"
               placeholder="Senha"
               isPassword
+              onChange={(e) => handleValidateStrengthPass(e.target.value)}
             />
+            <PasswordStrengthBar meter={meter} />
+            {meter ? (
+              <PasswordStrengthBarText meter={meter}>
+                <span>{meterText[meter]}</span>
+              </PasswordStrengthBarText>
+            ) : null}
             <Button type="submit">Cadastrar</Button>
           </Form>
           <Link to="/">
